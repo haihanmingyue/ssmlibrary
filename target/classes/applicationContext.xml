@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:annotation-config />
+    <context:component-scan base-package="com.wy.service" />
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <!-- 配置数据源 -->
+    <bean class="org.springframework.jdbc.datasource.DriverManagerDataSource" id="dataSource">
+    <property value="${jdbc.driver}" name="driverClassName"/>
+    <property value="${jdbc.url}" name="url"/>
+    <property value="${jdbc.username}" name="username"/>
+    <property value="${jdbc.password}" name="password"/>
+    </bean>
+
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+    <property name="dataSource" ref="dataSource"/>
+    <property value="com.wy.pojo" name="typeAliasesPackage"/>
+    <property value="classpath:com/wy/mapper/*.xml" name="mapperLocations"/>
+    <property name="plugins">
+    <list>
+    <bean class="com.github.pagehelper.PageInterceptor"/>
+    </list>
+    </property>
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.wy.mapper"/>
+    </bean>
+
+
+
+</beans>

@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>我的信息</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.staticfile.org/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+</head>
+<style>
+.mesg{
+    text-align: right;width: 100px;float: left;
+
+}
+.mesg1{
+    margin-top: 20px;
+
+}
+
+</style>
+<body>
+<div class="form-control" style="border-radius: 0;border-left: 0;border-right: 0;height: 52px;line-height: 43px">
+    <p style="font-size: 15px;margin-left: 5px">我的信息</p>
+</div>
+<div id="mymessage" style="padding-left: 100px;padding-top: 50px">
+    <div class="input-group mesg1">
+        <div  class="mesg"  >账号ID：</div>
+        <span id="userid">{{userid}}</span>
+    </div>
+    <br>
+    <div class="input-group mesg1">
+        <div  class="mesg" ><span>用户名：</span></div>
+        <span id="username">{{username}}</span>
+    </div>
+    <br>
+    <div class="input-group mesg1" >
+        <div class="mesg" ><span>租借卡ID：</span></div>
+        <span id="idcard">{{idcard}}</span>
+    </div>
+    <br>
+    <div class="input-group mesg1" >
+        <div class="mesg" ><span>创建时间：</span></div>
+        <span id="createtime">{{createtime}}</span>
+    </div>
+        <br>
+        <div class="input-group mesg1">
+            <div class="mesg" ><span>手机号：</span></div>
+            <input type="text" class="form-c" id="MyPhone" :value="phone" ><span id="tips3" style="color: #ff3333;position: relative;top: -5px"></span>
+        </div>
+    <br>
+    <div class="input-group mesg1" >
+        <div class="mesg" ><span>账户金额：</span></div>
+        <span id="owing_money">{{owing_money}}</span>
+    </div>
+</div>
+<button class="btn btn-success" style="position:absolute;left: 500px;top: 500px;width: 100px" onclick="jiaoFei()">缴费</button>
+<button class="btn btn-success" style="position:absolute;left: 650px;top: 500px;width: 100px" onclick="saveMsg()">保存</button>
+</body>
+<script>
+    var phone;
+    $.ajax({
+        url:"user/getUserMsg",
+        method:"get",
+        dataType:"json",
+        success:function(data){
+            phone = new Vue({
+                el:"#mymessage",
+                data:{
+                    userid:data.userid,
+                    username:data.username,
+                    idcard:data.idcard,
+                    phone:data.phone,
+                    createtime:data.createtime,
+                    owing_money:data.owing_money
+                }
+            })
+        },
+        error:function(){
+            alert("链接后台服务器失败");
+        }
+    });
+
+    function jiaoFei(){
+        $("#content").load("jiaofei.html");
+    }
+
+    $("#MyPhone").keyup(function () {
+        $("#tips3").text("");
+    });
+    function saveMsg(){
+        var reg = /^1[3456789]\d{9}$/;
+        if(reg.test($("#MyPhone").val())){
+            $.ajax({
+                url:"user/changePhone?",
+                method:"get",
+                dataType:"text",
+                data: {"phone":$("#MyPhone").val()},
+                success:function(data){
+                    if(data=="1"){
+                        alert("缴费成功");
+                    }else {
+                        alert("缴费失败");
+                    }
+                    $("#content").load("user/userindex");
+                },
+                error:function(){
+                    alert("链接后台服务器失败");
+                }
+            });
+        }else {
+            $("#tips3").text("请输入正确的手机号码");
+        }
+
+    }
+</script>
+</html>

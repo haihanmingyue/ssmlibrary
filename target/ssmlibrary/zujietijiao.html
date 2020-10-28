@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>租借提交</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.staticfile.org/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<style>
+
+    h4{
+        position: absolute;
+       left: 180px;
+    }
+</style>
+<body>
+
+<div id="tableDiv" class="col-xs-12" style="background-color: white;height: 100%" >
+<div id="sign">
+    租借提交
+</div>
+
+    <div id="table">
+        <table class="table table-bordered form-inline">
+            <caption>
+            </caption>
+            <thead>
+            <tr>
+                <th>图书ID</th>
+                <th>图书名</th>
+                <th>作者</th>
+                <th>出版社</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+                 <tr v-for="book in books">
+                     <td style="width: 10%">{{book[0]}}</td>
+                     <td style="width: 10%">{{book[1]}}</td>
+                     <td style="width: 20%">{{book[2]}}</td>
+                     <td style="width: 10%">{{book[3]}}</td>
+                     <td style="width: 5%"><input type="button" onclick="deleteBtn(this)"  value="删除"></td>
+                     </tr>
+
+            </tbody>
+
+        </table>
+        <input type="button" onclick="tijiao()" value="提交" class="btn btn-success" style="float: right">
+    </div>
+
+</div>
+</body>
+<script>
+  var table;
+   getBook();
+   //初始化图书查看页面
+   function getBook(){
+       $.ajax({
+           url: "book/bookZuJie/getBookList",
+           method:"get",
+           dataType: "json",
+           success:function(data){
+               table = new Vue({
+                   el:"#tableDiv",
+                   data: {
+                       books:data,
+                   }
+               })
+           },
+           error:function(){
+               $("#content").load("zujieindex.html");
+           }
+       });
+   }
+
+   function deleteBtn(button){
+       var x = button.parentNode.parentNode.children.item(0).innerText;
+       $.ajax({
+           url: "book/bookZuJie/deleteBookList?bookid="+x,
+           method:"get",
+           dataType: "text",
+           success:function(data){
+               if(data=="1"){
+                   $("#content").load("zujietijiao.html");
+               }else {
+                   alert("error");
+               }
+           },
+           error:function(){
+               $("#content").load("zujieindex.html");
+           }
+       });
+   }
+
+function tijiao(){
+    $.ajax({
+        url: "user/jieshu",
+        method:"get",
+        dataType: "text",
+        success:function(data){
+            if(data=="1"){
+                alert("成功");
+                $("#content").load("zujietijiao.html");
+            }else {
+                alert("error");
+            }
+        },
+        error:function(){
+            alert("error");
+        }
+    });
+}
+</script>
+</html>

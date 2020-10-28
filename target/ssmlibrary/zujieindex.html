@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>图书查看</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.staticfile.org/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<style>
+
+    h4{
+        position: absolute;
+       left: 180px;
+    }
+</style>
+<body>
+
+<div id="tableDiv" class="col-xs-12" style="background-color: white;height: 100%" >
+<div id="sign">
+    图书租借
+</div>
+
+    <div id="table">
+        <table class="table table-bordered form-inline">
+            <caption>
+                <div class="input-group" style="width: 200px">
+                    <input type="text" id="selectBookId" class="form-control" placeholder="图书ID/名称/作者/图书编号">
+                </div>
+                <div class="input-group" >
+                    <span class="input-group-addon" style="width: 50px">价格</span>
+                   <input type="text" id="startPrice" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,2})?).*$/g, '$1')"  class="form-control" style="width: 100px">
+                </div>
+                - <input type="text" id="endPrice" onkeyup="value=value.replace(/^\D*(\d*(?:\.\d{0,2})?).*$/g, '$1')" class="form-control" style="width: 100px">
+                <div class="input-group">
+                    <select id="SelectType" class="form-control" style="width: 200px;" >
+                       <option value="">图书状态</option>
+                      <option value="1">可租借</option>
+                       <option value="0">已被租借</option>
+                 </select>
+                </div>
+               <div class="input-group">
+                    <button class="btn btn-default" style="height: 35px;font-size: 10px;" onclick="searchBtn()">搜索</button>
+                </div>
+
+            </caption>
+            <thead>
+            <tr>
+                <th>图书ID</th>
+                <th>图书名称</th>
+                <th>图书作者</th>
+                <th>图书价格</th>
+                <th>出版社</th>
+                <th>图书状态</th>
+                <th>图书编号</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+                 <tr v-for="book in books">
+                     <td style="width: 10%">{{book.bookId}}</td>
+                     <td style="width: 20%">{{book.bookName}}</td>
+                     <td style="width: 10%">{{book.author}}</td>
+                     <td style="width: 10%">{{book.price}}</td>
+                     <td style="width: 10%">{{book.publisher}}</td>
+                     <td style="width: 10%">{{book.statusName}}</td>
+                     <td style="width: 10%">{{book.bookCode}}</td>
+                     <td style="width: 5%"><input type="button" onclick="addBook(this)" value="存入临时借书列表"></td>
+                     </tr>
+
+            </tbody>
+        </table>
+    </div>
+<div><button class="btn btn-primary" @click="tiJ" style="position: relative;left: 78.5%;width: 100px">借书提交</button></div>
+    <div class="footer"  >
+        <a style="color: black;cursor: text">共&nbsp;</a>
+        <a style="color: black;cursor: text">{{total}}</a>
+        <a style="color: black;cursor: text">&nbsp;条</a>
+        &nbsp;&nbsp;<a  onclick="goFirst()">首页</a>
+        &nbsp;&nbsp;<a id="prePage" onclick="goPre()">上一页</a>
+        &nbsp;&nbsp;<a id="nextPage" onclick="goNext()">下一页</a>
+        &nbsp;<a onclick="goEnd()">尾页</a>
+        &nbsp;&nbsp;<a style="color: black;cursor: text">第</a>
+        &nbsp;<a style="color: black;cursor: text">{{currentPage}}</a>
+        &nbsp;<a style="color: black;cursor: text">页</a>
+        &nbsp;<a style="color: black;cursor: text">共</a>
+        &nbsp;<a style="color: black;cursor: text">{{pages}}</a>
+        &nbsp;<a style="color: black;cursor: text">页</a>
+        &nbsp;&nbsp;<input type="text" onkeyup="keyup2()" id="toPageNum">
+        &nbsp;&nbsp;<button class="btn btn-success"  @click="tiaoZhuan"  >跳转</button>
+    </div >
+</div>
+</body>
+<script>
+  var table;
+   getBook();
+   //初始化图书查看页面
+   function getBook(){
+       $.ajax({
+           url: "book/getBook",
+           method:"get",
+           dataType: "json",
+           data: {"pageNum":1,"key":$("#selectBookId").val(),"startPrice":$("#startPrice").val(),"endPrice":$("#endPrice").val(),
+           "status":$("#SelectType").val()},
+           success:function(data){
+               table = new Vue({
+                   el:"#tableDiv",
+                   data: {
+                       books:data.list,
+                       currentPage:parseInt(data.pageNum),
+                       total:data.total,
+                       pages:data.pages,
+                   },
+                   methods: {
+                       tiJ:function (){
+                           $.ajax({
+                               url: "book/bookZuJie/tiJ",
+                               method:"get",
+                               dataType: "text",
+                               success:function(xx){
+                                   if(xx =="1"){
+                                       $("#content").load("zujietijiao.html");
+                                   }else if(xx=="0"){
+                                       alert("临时列表内无图书");
+                                   }else {
+                                       $("#content").load("denglu.html");
+                                   }
+                               },
+                               error:function(){
+                                   alert("链接后台服务器失败");
+                               }
+                           });
+                       },
+                       tiaoZhuan:function (){
+                           var page = $("#toPageNum").val();
+                           if(page!=""){
+                               changePage($("#toPageNum").val());
+                           }else {
+                               changePage(1);
+                           }
+                       }
+                   }
+               })
+               BtnDV();
+           },
+           error:function(){
+               alert("链接后台服务器失败");
+           }
+       });
+   }
+  function keyup2(){
+      var val = $("#toPageNum");
+      var text = val.val().replace(/^[0\D]/g, "");
+      val.val(text)
+  }
+
+  function addBook(button){
+          var flag = button.parentNode.parentNode.children[5].innerText
+          var bookid = button.parentNode.parentNode.children[0].innerText
+          var bookname = button.parentNode.parentNode.children[1].innerText
+          var author = button.parentNode.parentNode.children[2].innerText
+          var chubanshe = button.parentNode.parentNode.children[4].innerText
+          $.ajax({
+              url: "book/bookZuJie/addBook",
+              method:"get",
+              dataType: "text",
+              data: {"bookid":bookid,"bookname":bookname,"author":author,"chubanshe":chubanshe,"flag":flag},
+              success:function(res){
+                  if(res == "0"){
+                      alert("您还有书未归还/欠费未缴清，不能继续租借");
+                  }else if(res == "1"){
+                      alert("已添加到列表");
+                  }else if(res == "3"){
+                      alert("已被租借");
+                  }
+                  else if(res =="2"){
+                      alert("您最多租借五本书");
+                  }
+                  else if(res == "4"){
+                      alert("该书已在临时列表");
+                  }
+                  else {
+                      $("#content").load("denglu.html");
+                  }
+              },
+              error:function(){
+                  alert("链接服务器失败");
+              }
+          });
+
+  }
+   function changePage(Num){
+       $.ajax({
+           url: "book/getBook",
+           method:"get",
+           dataType: "json",
+           data: {"pageNum":Num,"key":$("#selectBookId").val(),"startPrice":$("#startPrice").val(),"endPrice":$("#endPrice").val(),
+               "status":$("#SelectType").val()},
+           success:function(data){
+               table.$data.books = data.list;
+               table.$data. currentPage=parseInt(data.pageNum);
+               table.$data. total=parseInt(data.total);
+               table.$data. pages=parseInt(data.pages);
+               BtnDV();
+           },
+           error:function(){
+               alert("链接后台服务器失败");
+           }
+       });
+   }
+
+
+    //搜索
+    function searchBtn() {
+        var pageNu = 1+"";
+        changePage(pageNu);
+    }
+
+    function goNext() {
+        changePage(table.$data.currentPage+1);
+    }
+    function goPre() {
+        changePage(table.$data.currentPage-1);
+    }
+    function goFirst() {
+        changePage(1);
+    }
+    function goEnd() {
+        changePage(table.$data.pages);
+    }
+    function BtnDV() {
+        if(table.$data.currentPage == table.$data.pages){
+            $("#nextPage").removeAttr('onclick');
+        }else {
+            $("#nextPage").attr("onclick","goNext();");
+        }
+        if(table.$data.currentPage <= 1){
+            $("#prePage").removeAttr('onclick');
+        }else {
+            $("#prePage").attr("onclick","goPre();");
+        }
+    }
+
+
+
+</script>
+</html>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wy.mapper.BookDao">
+   <select id="getBook" parameterType="map" resultType="com.wy.pojo.Book">
+       select * from book where 1=1
+       <if test="key != null and key != '' "> and concat(bookid,bookname,author,bookcode) like "%"#{key}"%"</if>
+       <if test="startPrice != null and startPrice != '' "> and price &gt;= #{startPrice} </if>
+       <if test="endPrice != null and endPrice != '' "> and price &lt;= #{endPrice} </if>
+       <if test="status != null and status != '' "> and status = #{status} </if>
+   </select>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO book_record
+        (userid, bookid, lendtime,expiretime)
+        VALUES
+        <foreach collection ="list" item="item" separator =",">
+            (#{item.userid}, #{item.bookid}, #{item.lendtime},#{item.expiretime})
+        </foreach >
+    </insert>
+
+
+    <update id="upStatus" parameterType="map">
+        update book set status = 1 where bookid = #{bookid}
+    </update>
+
+    <update id="batchUpdate"  parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update book
+            <set>
+                status = 0
+            </set>
+            where bookid = ${item.bookid}
+        </foreach>
+    </update>
+
+</mapper>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+</head>
+<style>
+    #comImg{
+        margin-top: 200px;
+        float: right;
+    }
+
+
+    #loginForm input{
+        width: 300px;
+        height: 50px;
+        border-radius: 100px;
+    }
+    #loginForm button{
+        width: 300px;
+        height: 50px;
+        margin-top: 50px;
+        border-radius: 100px;
+    }
+    #forgotPAS{
+        color: darkgrey;
+        margin-left: 141px;
+        margin-top: 20px;
+
+    }
+    #forgotPAS-a{
+        color: darkslateblue;
+    }
+    #noAccount{
+        margin-left: 111px;
+        margin-top: 200px;
+        color: darkblue;
+    }
+    #noAccount a{
+        color: darkslateblue;
+    }
+    #loginBtn{
+        margin-left: 21px;
+    }
+</style>
+<body style="background-color: #6BC095;">
+
+        <div  style="min-width: 700px;" >
+            <img src="images/img-01.png" alt="IMG" id="comImg" style="position:absolute;left: 200px;">
+
+
+            <div id="loginForm" style="position:absolute;left:600px;top: 250px">
+                <div>
+                    <input class="form-c" type="text" id="username" placeholder="账号" required="required" >
+                    <span class="tips" style="color: #ff3333;position: absolute;width: 100px;top: 5px"></span>
+                </div>
+                <br>
+                <div >
+                    <input class="form-c" type="password" id="password" placeholder="密码" required="required">
+                    <span class="tips" style="color: #ff3333;position: absolute;width: 100px;top: 80px"></span>
+                </div>
+
+                <div >
+                    <button class="btn btn-success" id="loginBtn" onclick="login()">
+                        登陆
+                    </button>
+                </div>
+
+                <div id="forgotPAS">
+                    <a id="forgotPAS-a">
+                        忘记密码？
+                    </a>
+                </div>
+                <div id="noAccount">
+                    <a >
+                        还没有账号？立即注册 ➡
+                    </a>
+                </div>
+    </div>
+</div>
+<script>
+
+    function login() {
+        var username = $("#username").val();
+        var password = $("#password").val();
+
+        if(username == ""){
+            $(".tips").eq(0).text("账号不能为空");
+        }else {
+            $(".tips").eq(0).text("");
+        }
+
+        if(password == ""){
+            $(".tips").eq(1).text("密码不能为空");
+        }else {
+            $(".tips").eq(1).text("");
+        }
+        if(username != "" && password != ""){
+            $.ajax({
+                url:"login",
+                dataType:"text",
+                type:"post",
+                data:{"username":username,"password":password},
+                success:function(data){
+                    if(data.trim() == "1"){
+                        window.location.href = "index";
+                    }else if(data.trim() == "2"){
+                        $(".tips").eq(0).text("该账号已被锁定");
+                    }
+                    else {
+                        $(".tips").eq(0).text("用户名或密码错误");
+                    }
+                },
+                error:function(){
+                    alert("链接后台服务器失败");
+                }
+            });
+        }
+
+    }
+</script>
+
+</body>
+</html>

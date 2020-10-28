@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.staticfile.org/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+<!--<%&#45;&#45;       //顶部&#45;&#45;%>-->
+<div class="nav nav-pills col-xs-12 col-sm-12" id="nav">
+    <div id="logo">
+        <p>LOGO</p>
+    </div>
+    <a id="name">图书租借系统</a>
+    <button type="button" id="lgout" onclick="toLgOut()" class="btn btn-default">退出</button>
+
+    <button type="button" id="login" onclick="tologin()" v-if="show<2" class="btn btn-primary">登录</button>
+    <a id="account" v-else-if="show>2"  :title="titles">{{username}}</a>
+</div>
+
+<!--<%&#45;&#45;        侧边&#45;&#45;%>-->
+<div style="width: 100%;" class="col-xs-2" id="cloudDiv">
+
+    <div id="cebian" class="col-xs-4" style="height: 85%">
+        <div id="home" class="CBDiv">
+            <span class="glyphicon glyphicon-home" style="font-size: 20px;position: relative;top: 7px"></span> <a style="color: black;font-size: 18px;position: relative;top: 5px;" id="index-home"> 首页</a>
+        </div>
+
+        <div class="CBDiv">
+            <div class="li-title"><span class="li-name">用户中心</span> <span class="jiantou">▶</span></div>
+            <div class="li-menu" >
+                <div class="li" onclick="userIndex()"><span  class="li-name">我的信息</span></div>
+                <div class="li" onclick="MyZuJie()"><span  class="li-name">我的租书</span></div>
+                <div class="li" onclick="ZuJieHistory()"><span  class="li-name">租书历史</span></div>
+            </div>
+        </div>
+        <div class="CBDiv">
+            <div class="li-title"><span class="li-name">图书租借</span> <span class="jiantou">▶</span></div>
+            <div class="li-menu">
+                <div class="li" onclick="bookIndex()" ><span class="li-name">图书查看</span></div>
+
+            </div>
+        </div>
+        <div style="clear:both;" title="该标签用于清除du浮动，使left和right的父标签能自zhi适应高度！"></div>
+    </div>
+    <div id="content"  >
+
+    </div>
+</div>
+
+</body>
+<script>
+
+    var height = window.innerHeight;
+    $('#cloudDiv').css('height',height);
+    window.onresize = function(){
+        height  = window.innerHeight;
+        $('#cloudDiv').css('height',height);
+    }
+
+    var user;
+
+    $.ajax({
+        url:"getUser",
+        method:"get",
+        dataType:"json",
+        data:{},
+        success:function(data){
+           user = new Vue({
+                el: '#nav',
+                data: {
+                    titles:data.username,
+                    username:data.username,
+                    show:1
+                },
+                created(){
+                    if (data.username != null && data.username != ""){
+                        this.show = 3
+                    }
+                }
+            })
+        },
+        error:function(){
+            alert("链接后台服务器失败");
+        }
+    });
+
+
+
+    $("#content").load("shouye.html");
+var lis = $(".li-menu");
+var jianrou = $(".jiantou");
+lis.hide();
+
+$("#index-home").click(function () {
+$("#content").load("shouye.html");
+});
+
+//侧边导航
+$(".li-title").click(function () {
+if($(this).text().indexOf("用户中心") != -1){
+
+lis.not(':eq(0)').hide(300,function () {
+jianrou.not(':eq(0)').text("▶");
+});//关闭其他的栏目
+
+lis.eq(0).slideToggle(function () {
+if(lis.eq(0).is(":visible")){
+jianrou.eq(0).text("▼");
+}else {
+jianrou.eq(0).text("▶");
+}
+});
+}else if($(this).text().indexOf("图书租借") != -1){
+lis.not(':eq(1)').hide(300,function () {
+jianrou.not(':eq(1)').text("▶");
+});//关闭其他的栏目
+lis.eq(1).slideToggle(function () {
+if(lis.eq(1).is(":visible")){
+jianrou.eq(1).text("▼");
+}else {
+jianrou.eq(1).text("▶");
+}
+});
+}
+
+});
+
+function tologin(){
+    $("#content").load("denglu.html");
+}
+
+function ZuJieHistory(){
+    $("#content").load("user/toZuJieHistory");
+}
+
+function MyZuJie(){
+    $("#content").load("user/toMyZuJie");
+}
+function toLgOut(){
+window.location.href="lgOut";
+}
+function userIndex() {
+$("#content").load("user/userindex");
+}
+
+
+function bookIndex() {
+$("#content").load("book/bookindex");
+}
+
+
+
+
+</script>
+</html>

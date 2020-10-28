@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>我的租书</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.staticfile.org/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<style>
+    h4{
+        position: absolute;
+       left: 180px;
+    }
+</style>
+<body>
+
+<div id="tableDiv" class="col-xs-12" style="background-color: white;height: 100%" >
+<div id="sign">
+    正在租借中的图书
+</div>
+
+    <div id="table">
+        <table id="tables" class="table table-bordered form-inline">
+            <thead>
+            <tr>
+                <th>租书编号</th>
+                <th>租书人ID</th>
+                <th>图书名</th>
+                <th>借书时间</th>
+                <th>到期时间</th>
+                <th>剩余时间</th>
+                <th>逾期欠费/元</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+                 <tr v-for="book in books">
+                     <td style="width: 10%">{{book.recordId}}</td>
+                     <td style="width: 10%">{{book.userid}}</td>
+                     <td style="width: 20%" :id="book.bookId" >{{book.bookName}}</td>
+                     <td style="width: 10%" class="lengTime">{{book.lendTime}}</td>
+                     <td style="width: 10%" class="expireTime" >{{book.expireTime}}</td>
+                     <td ><span class="lessDay">1</span></td>
+                     <td><span class="money">2</span></td>
+                     <td style="width: 5%"><input type="button"  onclick="huanShu(this)" value="还书"></td>
+                     </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+<script>
+  var table;
+   getBook();
+   //初始化图书查看页面
+   function getBook(){
+       $.ajax({
+           url: "user/getMyZuJie",
+           method:"get",
+           dataType: "json",
+           success:function(data){
+               table = new Vue({
+                   el:"#tableDiv",
+                   data: {
+                       books:data
+                   },
+                   created(){
+                   }
+               })
+               var tables = document.getElementById("tables");
+               for(var i=0;i<table.$data.books.length;i++){
+                   var k1 = new Date();
+                   var k2 = new Date(table.$data.books[i].expireTime);
+                   var days = k2.getTime() - k1.getTime()
+                   var times = parseInt(days/(1000*60*60*24));
+                   tables.children[1].children[i].children[5].innerText = times+"天";
+                   if(times<0){
+                       tables.children[1].children[i].children[6].innerText =(Math.abs(times)*0.2);
+                   }else {
+                       tables.children[1].children[i].children[6].innerText = 0;
+                   }
+               }
+           },
+           error:function(){
+               alert("链接后台服务器失败");
+           }
+       });
+   }
+
+   function huanShu(button){
+       var zujiecode = button.parentNode.parentNode.children[0].innerText;
+       var bookid = button.parentNode.parentNode.children[2].id;
+       var money = button.parentNode.parentNode.children[6].innerText;
+       $.ajax({
+           url: "user/haunshu",
+           method:"post",
+           dataType: "text",
+           data: {"zujiecode":zujiecode,"bookid":bookid,"money":money},
+           success:function(data){
+               if(data == "1"){
+                   alert("成功");
+                   $("#content").load("myzujie.html");
+               }else {
+                   alert("失败");
+               }
+           },
+           error:function(){
+               alert("链接后台服务器失败");
+           }
+       });
+   }
+
+</script>
+</html>

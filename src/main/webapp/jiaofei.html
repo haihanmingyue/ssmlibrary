@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>缴费</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.staticfile.org/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+</head>
+<style>
+.mesg{
+    text-align: right;width: 100px;float: left;
+
+}
+.mesg1{
+    margin-top: 20px;
+
+}
+
+</style>
+<body>
+<div class="form-control" style="border-radius: 0;border-left: 0;border-right: 0;height: 52px;line-height: 43px">
+    <p style="font-size: 15px;margin-left: 5px">缴费</p>
+</div>
+<div id="mymessage" style="padding-left: 100px;padding-top: 50px">
+    <div class="input-group mesg1">
+        <div  class="mesg"  >账号ID：</div>
+        <span id="userid">{{userid}}</span>
+    </div>
+    <br>
+    <div class="input-group mesg1">
+        <div  class="mesg" ><span>用户名：</span></div>
+        <span id="username">{{username}}</span>
+    </div>
+    <br>
+    <div class="input-group mesg1" >
+        <div class="mesg" ><span>租借卡ID：</span></div>
+        <span id="idcard">{{idcard}}</span>
+    </div>
+    <br>
+
+        <div class="input-group mesg1">
+            <div class="mesg" ><span>缴费金额：</span></div>
+            <input type="text" class="form-c" id="money" onkeyup="moneyKeyUp()" >
+        </div>
+    <br>
+    <div class="input-group mesg1" >
+        <div class="mesg" ><span>账户金额：</span></div>
+        <input class="form-c" id="owing_money" :value="values" disabled="disabled">
+    </div>
+</div>
+<button class="btn btn-success" style="margin-left: 500px;margin-top: 50px;width: 100px" onclick="jiaofei()">缴费</button>
+
+</body>
+<script>
+    var orimonry;
+    var phone;
+    $.ajax({
+        url:"user/getUserMsg",
+        method:"get",
+        dataType:"json",
+        success:function(data){
+            phone = new Vue({
+                el:"#mymessage",
+                data:{
+                    userid:data.userid,
+                    username:data.username,
+                    idcard:data.idcard,
+                    phone:data.phone,
+                    createtime:data.createtime,
+                    values:data.owing_money
+                }
+            })
+            orimonry = data.owing_money;
+        },
+        error:function(){
+            alert("链接后台服务器失败");
+        }
+    });
+
+
+    function moneyKeyUp(){
+         $("#money").val($("#money").val().replace(/^\D*(\d*(?:\.\d{0,2})?).*$/g, '$1'));
+         var c ;
+         if($("#money").val().trim()==""){
+             c = 0;
+         }else {
+             c = parseFloat( $("#money").val().trim());
+         }
+        var x = c + parseFloat(orimonry);
+        phone.$data.values = x+"";
+
+    }
+    function jiaofei() {
+        if ($("#money").val() != "") {
+            $.ajax({
+                url: "user/jiaofei",
+                method: "get",
+                dataType: "text",
+                data: {"money": $("#money").val()},
+                success: function (data) {
+                    if (data == "1") {
+                        alert("缴费成功");
+                    } else {
+                        alert("修改失败");
+                    }
+                    $("#content").load("jiaofei.html");
+                },
+                error: function () {
+                    alert("链接后台服务器失败");
+                }
+            });
+        }
+    }
+</script>
+</html>

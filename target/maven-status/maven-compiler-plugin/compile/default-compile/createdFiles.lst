@@ -1,0 +1,12 @@
+com\wy\controller\IndexController.class
+com\wy\interceptor\LoginInterceptor.class
+com\wy\service\UserServiceImpl.class
+com\wy\controller\UserController.class
+com\wy\service\UserService.class
+com\wy\mapper\UserDao.class
+com\wy\controller\BookController.class
+com\wy\service\BookServiceImpl.class
+com\wy\mapper\BookDao.class
+com\wy\pojo\User.class
+com\wy\pojo\Book.class
+com\wy\service\BookService.class

@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>租书记录</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.staticfile.org/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<style>
+
+    h4{
+        position: absolute;
+       left: 180px;
+    }
+</style>
+<body>
+
+<div id="tableDiv" class="col-xs-12" style="background-color: white;height: 100%" >
+<div id="sign">
+    租书记录
+</div>
+
+    <div id="table">
+        <table class="table table-bordered form-inline">
+            <caption>
+                <div class="input-group" style="width: 200px">
+                    <input type="text" id="selectKey" class="form-control" placeholder="图书ID/名称">
+                </div>
+               <div class="input-group">
+                    <button class="btn btn-default" style="height: 35px;font-size: 10px;" onclick="searchBtn()">搜索</button>
+                </div>
+
+            </caption>
+            <thead>
+            <tr>
+                <th>租书编号</th>
+                <th>租书人ID</th>
+                <th>图书名</th>
+                <th>借书时间</th>
+                <th>归还时间</th>
+                <th>到期时间</th>
+            </tr>
+            </thead>
+            <tbody>
+                 <tr v-for="book in books">
+                     <td style="width: 10%">{{book.recordId}}</td>
+                     <td style="width: 10%">{{book.userid}}</td>
+                     <td style="width: 20%">{{book.bookName}}</td>
+                     <td style="width: 10%">{{book.lendTime}}</td>
+                     <td style="width: 10%">{{book.returnTime}}</td>
+                     <td style="width: 10%">{{book.expireTime}}</td>
+                     </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer"  >
+        <a style="color: black;cursor: text">共&nbsp;</a>
+        <a style="color: black;cursor: text">{{total}}</a>
+        <a style="color: black;cursor: text">&nbsp;条</a>
+        &nbsp;&nbsp;<a  onclick="goFirst()">首页</a>
+        &nbsp;&nbsp;<a id="prePage" onclick="goPre()">上一页</a>
+        &nbsp;&nbsp;<a id="nextPage" onclick="goNext()">下一页</a>
+        &nbsp;<a onclick="goEnd()">尾页</a>
+        &nbsp;&nbsp;<a style="color: black;cursor: text">第</a>
+        &nbsp;<a style="color: black;cursor: text">{{currentPage}}</a>
+        &nbsp;<a style="color: black;cursor: text">页</a>
+        &nbsp;<a style="color: black;cursor: text">共</a>
+        &nbsp;<a style="color: black;cursor: text">{{pages}}</a>
+        &nbsp;<a style="color: black;cursor: text">页</a>
+        &nbsp;&nbsp;<input type="text" onkeyup="keyup2()" id="toPageNum">
+        &nbsp;&nbsp;<button class="btn btn-success" @click="tiaoZhuan()"  >跳转</button>
+    </div >
+</div>
+</body>
+<script>
+  var table;
+   getBook();
+   //初始化图书查看页面
+   function getBook(){
+       $.ajax({
+           url: "user/getHistory?pageNum=1&key="+$("#selectKey").val(),
+           method:"get",
+           dataType: "json",
+           success:function(data){
+               table = new Vue({
+                   el:"#tableDiv",
+                   data: {
+                       books:data.list,
+                       currentPage:parseInt(data.pageNum),
+                       total:data.total,
+                       pages:data.pages,
+                   },
+                   methods: {
+                       tiaoZhuan:function (){
+                           var page = $("#toPageNum").val();
+                           if(page!=""){
+                               changePage($("#toPageNum").val());
+                           }else {
+                               changePage(1);
+                           }
+                       }
+                   }
+               })
+               BtnDV();
+           },
+           error:function(){
+               alert("链接后台服务器失败");
+           }
+       });
+   }
+  function keyup2(){
+      var val = $("#toPageNum");
+      var text = val.val().replace(/^[0\D]/g, "");
+      val.val(text)
+  }
+   function changePage(Num){
+       $.ajax({
+           url: "user/getHistory",
+           method:"get",
+           dataType: "json",
+           data: {"pageNum":Num,"key":$("#selectKey").val()},
+           success:function(data){
+               table.$data.books = data.list;
+               table.$data. currentPage=parseInt(data.pageNum);
+               table.$data. total=parseInt(data.total);
+               table.$data. pages=parseInt(data.pages);
+               BtnDV();
+           },
+           error:function(){
+               alert("链接后台服务器失败");
+           }
+       });
+   }
+
+    //搜索
+    function searchBtn() {
+        var pageNu = 1+"";
+        changePage(pageNu);
+    }
+
+    function goNext() {
+        changePage(table.$data.currentPage+1);
+    }
+    function goPre() {
+        changePage(table.$data.currentPage-1);
+    }
+    function goFirst() {
+        changePage(1);
+    }
+    function goEnd() {
+        changePage(table.$data.pages);
+    }
+    function BtnDV() {
+        if(table.$data.currentPage == table.$data.pages){
+            $("#nextPage").removeAttr('onclick');
+        }else {
+            $("#nextPage").attr("onclick","goNext();");
+        }
+        if(table.$data.currentPage <= 1){
+            $("#prePage").removeAttr('onclick');
+        }else {
+            $("#prePage").attr("onclick","goPre();");
+        }
+    }
+
+
+
+</script>
+</html>

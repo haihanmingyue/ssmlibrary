@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wy.mapper.UserDao">
+
+    <select id="login" parameterType="com.wy.pojo.User" resultType="com.wy.pojo.User">
+        select username,status,userid,owing_money from user where username = #{username} and password = #{password}
+    </select>
+
+    <update id="jiaoFei" parameterType="map" >
+         update user set owing_money = owing_money + #{upMoney} WHERE userid = #{userid};
+    </update>
+
+    <select id="getUser" parameterType="string" resultType="com.wy.pojo.User">
+        select userid,username,idcard,phone,createtime,status,owing_money from user where username = #{username}
+    </select>
+
+    <select id="getHistory" parameterType="map" resultType="com.wy.pojo.Book_Record">
+        select book_record.*,book.bookname from book_record,book where book_record.bookid = book.bookid and book_record.userid = #{userid}
+        <if test="key != null and key != '' "> and concat(book_record.bookid,book.bookname) like "%"#{key}"%"</if>
+    </select>
+
+    <update id="updateRecord" parameterType="map">
+       update book_record set returntime = #{time} where recordid = #{recordid}
+    </update>
+
+    <insert id="insertRecord" parameterType="map" >
+        insert into money_change (userid,money,time,type) VALUES (#{userid},#{upMoney},#{time},#{type})
+    </insert>
+
+    <select id="MyZuJie" parameterType="int" resultType="com.wy.pojo.Book_Record">
+        select book_record.*,book.bookname from book_record,book where book_record.bookid = book.bookid and book_record.userid = #{userid}
+        and( book_record.returntime is null or book_record.returntime = '')
+    </select>
+
+    <select id="MyZuJieCount" parameterType="int" resultType="int">
+        select count(1) from book_record,book where book_record.bookid = book.bookid and book_record.userid = #{userid}
+        and( book_record.returntime is null or book_record.returntime = '')
+    </select>
+
+    <update id="changePhone" parameterType="com.wy.pojo.User" >
+        update user set phone = #{phone} where username = #{username}
+    </update>
+</mapper>
